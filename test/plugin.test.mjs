@@ -41,6 +41,10 @@ test("Magpie sign-in and quota use the real Credit Grants response shape", async
 
   const credentialsPath = join(home, ".magpie-openai-api-credit.json");
   const { config, auth } = await plugin.server();
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  assert.match(decodeURIComponent(manifest.magpie.icon), /^data:image\/svg\+xml,<svg /);
+  const customIcon = "https://example.com/icon.png";
+  assert.equal((await plugin.server({}, { icon: customIcon })).auth.icon, customIcon);
   const openai = { options: { apiKey: "model-api-key" }, models: { "gpt-test": {} } };
   const configuration = { provider: { openai } };
   await config(configuration);
@@ -81,25 +85,24 @@ test("Magpie sign-in and quota use the real Credit Grants response shape", async
   const getAuth = async () => ({ type: "api", key: result.key });
   assert.deepEqual(await auth.usage(getAuth), {
     balance: "$40.00",
-    windows: [{
-      name: "Next credit expiry",
-      aside: true,
-      display: "$40.00 · 2033-05-18 03:33 UTC",
-      runsOutAt: EXPIRY,
-      runsOut: 40,
-      unit: "USD",
-    }],
+    plan: "Next credit expiry · $40.00",
+    until: EXPIRY,
+    renew: "off",
+    windows: [],
   });
 
   response = () => Response.json({ ...summary, total_available: 12.34, total_paid_available: 4 });
-  const paid = await auth.usage(getAuth);
-  assert.equal(paid.balance, "$12.34");
-  assert.equal(paid.windows[0].runsOutAt, EXPIRY);
-  assert.equal(paid.windows[0].runsOut, undefined);
+  assert.deepEqual(await auth.usage(getAuth), {
+    balance: "$12.34",
+    plan: "Next credit expiry",
+    until: EXPIRY,
+    renew: "off",
+    windows: [],
+  });
   assert.equal(requests, 3);
 
   response = () => Response.json({ ...summary, total_available: 0, grants: { data: [] } });
-  assert.deepEqual(await auth.usage(getAuth), { balance: "$0.00", windows: [] });
+  assert.deepEqual(await auth.usage(getAuth), { balance: "$0.00", plan: "API credits", windows: [] });
 
   for (const status of [401, 403, 429, 500]) {
     response = () => new Response(`${TOKEN} ${ORG}`, { status });

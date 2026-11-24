@@ -55,26 +55,24 @@ async function queryCredits({ sessionBearer, organization }, signal) {
 }
 
 function quotaOf({ available, expiresAt, usableGrants }) {
-  const windows = [];
-  if (expiresAt) {
-    const expiring = usableGrants
-      .filter((grant) => grant.expiresAt === expiresAt)
-      .reduce((total, grant) => total + grant.remaining, 0);
-    const date = expiresAt.slice(0, 16).replace("T", " ") + " UTC";
-    windows.push({
-      name: "Next credit expiry",
-      aside: true,
-      display: expiring ? `${USD.format(expiring)} · ${date}` : date,
-      runsOutAt: expiresAt,
-      ...(expiring ? { runsOut: expiring, unit: "USD" } : {}),
-    });
-  }
-  return { balance: USD.format(available), windows };
+  // Magpie records a card's dollar balance history when it has no quota windows.
+  const quota = { balance: USD.format(available), plan: "API credits", windows: [] };
+  if (!expiresAt) return quota;
+
+  const expiring = usableGrants
+    .filter((grant) => grant.expiresAt === expiresAt)
+    .reduce((total, grant) => total + grant.remaining, 0);
+  return {
+    ...quota,
+    plan: expiring ? `Next credit expiry · ${USD.format(expiring)}` : "Next credit expiry",
+    until: expiresAt,
+    renew: "off",
+  };
 }
 
 export default {
   id: "magpie-openai-api-credit",
-  async server() {
+  async server(_input, options) {
     const credentialsPath = join(homedir(), ".magpie-openai-api-credit.json");
     return {
       async config(config) {
@@ -83,6 +81,7 @@ export default {
       },
       auth: {
         provider: PROVIDER,
+        icon: typeof options?.icon === "string" ? options.icon : undefined,
         single: true,
         methods: [{
           type: "oauth",
