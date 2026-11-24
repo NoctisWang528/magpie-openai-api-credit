@@ -50,8 +50,10 @@ magpie plugin logout openai-api-credit
 rm -f "$HOME/.magpie-openai-api-credit.json"
 ```
 
-## 开发与来源
+## 开发
 
 运行 `npm test` 验证登录流程、真实余额字段的映射、到期计算和会话失效处理。插件运行时无额外依赖。
 
-`balance.cjs` 原样复用 [Token Monitor 的 OpenAI API Credits 插件](https://github.com/Javis603/token-monitor/tree/e11c9f38281173f587a4d1b65ed4c3dec12dee89/plugins/openai-api-credit)，初始实现见 [PR #1407](https://github.com/Javis603/token-monitor/pull/1407)。采用 [MIT 许可证](./LICENSE)，保留原作者版权声明。
+## 许可证
+
+[MIT](./LICENSE)
