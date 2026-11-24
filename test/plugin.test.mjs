@@ -42,7 +42,9 @@ test("Magpie sign-in and quota use the real Credit Grants response shape", async
   const credentialsPath = join(home, ".magpie-openai-api-credit.json");
   const { config, auth } = await plugin.server();
   const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
-  assert.match(decodeURIComponent(manifest.magpie.icon), /^data:image\/svg\+xml,<svg /);
+  assert.equal(manifest.magpie.icon, "https://usemagpie.ai/icons/openai.svg");
+  assert.equal((await plugin.server({}, manifest.magpie.options)).auth.icon, manifest.magpie.icon);
+  assert.equal((await plugin.server({}, { icon: "codex-color" })).auth.icon, "https://usemagpie.ai/icons/codex-color.svg");
   const customIcon = "https://example.com/icon.png";
   assert.equal((await plugin.server({}, { icon: customIcon })).auth.icon, customIcon);
   const openai = { options: { apiKey: "model-api-key" }, models: { "gpt-test": {} } };

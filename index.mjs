@@ -74,6 +74,10 @@ export default {
   id: "magpie-openai-api-credit",
   async server(_input, options) {
     const credentialsPath = join(homedir(), ".magpie-openai-api-credit.json");
+    let icon = typeof options?.icon === "string" ? options.icon.trim() : "";
+    if (/^[a-z0-9][a-z0-9-]*$/.test(icon)) {
+      icon = `https://usemagpie.ai/icons/${icon}.svg`;
+    }
     return {
       async config(config) {
         config.provider ??= {};
@@ -81,7 +85,7 @@ export default {
       },
       auth: {
         provider: PROVIDER,
-        icon: typeof options?.icon === "string" ? options.icon : undefined,
+        icon,
         single: true,
         methods: [{
           type: "oauth",
