@@ -1,0 +1,24 @@
+{
+  "name": "magpie-openai-api-credit",
+  "version": "0.1.0",
+  "description": "Read OpenAI Platform API credit balances and grant expiry in Magpie.",
+  "type": "module",
+  "main": "./index.mjs",
+  "files": ["index.mjs", "balance.cjs", "README.md", "LICENSE"],
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": ["magpie", "magpie-plugin", "openai", "billing", "credit-grants"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NoctisWang528/magpie-openai-api-credit.git"
+  },
+  "magpie": {
+    "name": "OpenAI API Credits",
+    "summary": {
+      "en": "Show your OpenAI Platform credit balance and grant expiry.",
+      "zh": "查看 OpenAI Platform 的实际 API 余额和点数到期时间。"
+    }
+  }
+}
